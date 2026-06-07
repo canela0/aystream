@@ -38,6 +38,14 @@
                 st.setString(4, contrasena.trim());
                 st.executeUpdate();
 
+                // Asignar rol admin para que el Realm permita el acceso
+                PreparedStatement stRol = conecta.prepareStatement(
+                    "INSERT IGNORE INTO user_roles (correo, role_name) VALUES (?, 'admin')"
+                );
+                stRol.setString(1, correo.trim());
+                stRol.executeUpdate();
+                stRol.close();
+
                 response.sendRedirect("inicioSesion.jsp");
 
             } catch (java.sql.SQLIntegrityConstraintViolationException e) {
