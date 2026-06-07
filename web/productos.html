@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Productos</title>
+    <link rel="stylesheet" href="estilo.css" />
+  </head>
+
+  <body>
+    <div class="boton-volver">
+      <input
+        type="button"
+        class="boton boton-borde"
+        value="← Volver al menú"
+        onclick="location.href = 'menu.html'"
+      />
+    </div>
+
+    <section class="seccion">
+      <h2 class="titulo-seccion">Inventario</h2>
+      <p class="subtitulo-seccion">Gestiona tus productos y existencias</p>
+      <div class="grid-opciones">
+        <div
+          class="tarjeta-opcion"
+          onclick="location.href = 'agregarProducto.html'"
+        >
+          <div class="area-imagen2 fondo-azul">
+            <img src="agregar.png" class="imagen2" />
+          </div>
+          <div class="texto-opcion">
+            <p class="titulo-opcion">Registrar Producto</p>
+            <p class="descripcion-opcion">
+              Agrega nuevos productos al inventario
+            </p>
+          </div>
+        </div>
+
+        <div
+          class="tarjeta-opcion"
+          onclick="location.href = 'modificarProducto.jsp'"
+        >
+          <div class="area-imagen2 fondo-naranja">
+            <img src="editar.png" class="imagen2" />
+          </div>
+
+          <div class="texto-opcion">
+            <p class="titulo-opcion">Modificar Producto</p>
+            <p class="descripcion-opcion">Actualiza información de productos</p>
+          </div>
+        </div>
+
+        <div
+          class="tarjeta-opcion"
+          onclick="location.href = 'consultarProductos.jsp'"
+        >
+          <div class="area-imagen2 fondo-verde">
+            <img src="consultar.png" class="imagen2" />
+          </div>
+
+          <div class="texto-opcion">
+            <p class="titulo-opcion">Consultar Inventario</p>
+            <p class="descripcion-opcion">
+              Ver todos los productos registrados
+            </p>
+          </div>
+        </div>
+
+        <div
+          class="tarjeta-opcion"
+          onclick="location.href = 'bajaProducto.jsp'"
+        >
+          <div class="area-imagen2 fondo-morado">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+          </div>
+          <div class="texto-opcion">
+            <p class="titulo-opcion">Registrar Baja</p>
+            <p class="descripcion-opcion">Merma, pérdida o caducidad</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context path="/PayStream">
+
+    <Resource name="jdbc/payStream"
+              auth="Container"
+              type="javax.sql.DataSource"
+              driverClassName="com.mysql.cj.jdbc.Driver"
+              url="jdbc:mysql://localhost:3306/payStream"
+              username="root"
+              password="n0m3l0"
+              maxTotal="20"
+              maxIdle="10"
+              maxWaitMillis="10000"/>
+
+    <Realm className="org.apache.catalina.realm.DataSourceRealm"
+           dataSourceName="jdbc/payStream"
+           localDataSource="true"
+           userTable="usuarios"
+           userNameCol="correo"
+           userCredCol="contrasena"
+           userRoleTable="user_roles"
+           roleNameCol="role_name"/>
+
+</Context>

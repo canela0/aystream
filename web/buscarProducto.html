@@ -1,0 +1,84 @@
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width initial-scale=1.0" />
+    <title>Modificar Productos</title>
+    <link rel="stylesheet" href="estilo.css" />
+
+  </head>
+  <body class="inicio">
+    <section class="inicio-seccion">
+      <div class="boton-volver">
+        <input
+          type="button"
+          class="boton boton-borde"
+          value="← Volver al menú"
+          onclick="location.href='menu.html';"
+        />
+      </div>
+      <div class="boton-volver2">
+        <input type="button" class="boton boton-borde" value="← Volver" onclick="location.href='productos.html';"/>
+        <h2 class="titulo-seccion">Modificar Producto</h2>
+      </div>
+
+      <div class="division flex">
+        <div class="izquierda">
+          <form class="grupo-formulario2" action="buscarProducto.jsp" method="post" onsubmit="return validaDatosProducto()">
+            
+            <div class="caja-seccion tarjeta">
+              <div class="texto-centro">
+                <p class="titulo-seccion2">Modificar Producto</p>
+                <p class="subtitulo-seccion2">
+                  Busca un producto por su nombre para modificar sus datos
+                </p>
+              </div>
+              <div>
+                <label style="margin-top: 40px">Nombre del producto</label>
+                <input class="input-datos2" type="text" name="nombre" id="nombreBusqueda"/>
+                <a id="mensajeErrorBusqueda" class="mensajeError"></a>
+              </div>           
+              <button class="boton boton-primario" style="margin-top: 20px">
+                Buscar
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div class="derecha" id="formDerecha">
+          <form class="grupo-formulario2" action="modificarProducto.jsp" method="post" onsubmit="return validaRegistroProducto()">
+                <div class="caja-seccion tarjeta">
+                    <div class="texto-centro">
+                        <p class="subtitulo-seccion2">Ingresa los datos nuevos del producto modificado</p>
+                    </div>
+
+                    <div>
+                        <label style="margin-top: 40px">Nombre del producto</label>
+                        <input class="input-datos2" type="text" id="nombre" name="nombre"/>
+                         <a id="mensajeErrorNombre" class="mensajeError"></a>
+                    </div>
+
+                    <div class="flex" style="gap: 10px">
+                        <div>
+                            <label>Cantidad disponible</label>
+                            <input class="input-datos3" type="number" id="cantidad" name="cantidad" placeholder="0" step="1" min="0"/>
+                            <a id="mensajeErrorCantidad" class="mensajeError"></a>
+                        </div>
+                        
+                        <div>
+                            <label>Precio por unidad ($)</label>
+                            <input class="input-datos3" type="number" id="precio" name="precio" placeholder="0.00" step="0.01" min="0"/>
+                            <a id="mensajeErrorPrecio" class="mensajeError"></a>
+                        </div>
+                    </div>
+
+                    <button class="boton boton-primario" style="margin-top: 20px" type="submit">
+                        Guardar cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+      </div>
+    </section>
+    <script src="validaFormulario.js"></script>
+  </body>
+</html>

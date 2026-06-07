@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
+                             https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd"
+         version="5.0">
+
+    <display-name>PayStream</display-name>
+
+    <!-- ── Página de bienvenida ── -->
+    <welcome-file-list>
+        <welcome-file>inicioSesion.jsp</welcome-file>
+    </welcome-file-list>
+
+    <!-- ══════════════════════════════════════════
+         SEGURIDAD: protege todo excepto el login
+         ══════════════════════════════════════════ -->
+    <security-constraint>
+        <display-name>Área protegida</display-name>
+        <web-resource-collection>
+            <web-resource-name>PayStream App</web-resource-name>
+            <!-- Protege todas las páginas excepto login y registro -->
+            <url-pattern>/dashboard.jsp</url-pattern>
+            <url-pattern>/menu.html</url-pattern>
+            <url-pattern>/productos.html</url-pattern>
+            <url-pattern>/ventas.jsp</url-pattern>
+            <url-pattern>/reportes.jsp</url-pattern>
+            <url-pattern>/balanceSemanal.jsp</url-pattern>
+            <url-pattern>/historialVentas.jsp</url-pattern>
+            <url-pattern>/reporteInventario.jsp</url-pattern>
+            <url-pattern>/consultarProductos.jsp</url-pattern>
+            <url-pattern>/agregarProducto.html</url-pattern>
+            <url-pattern>/registroProducto.jsp</url-pattern>
+            <url-pattern>/modificarProducto.html</url-pattern>
+            <url-pattern>/modificarProducto.jsp</url-pattern>
+            <url-pattern>/editarProducto.jsp</url-pattern>
+            <url-pattern>/carritoCompras.jsp</url-pattern>
+            <url-pattern>/ticketCompra.jsp</url-pattern>
+            <url-pattern>/bajaProducto.jsp</url-pattern>
+            <url-pattern>/misDatos.jsp</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <!-- Solo usuarios con rol 'admin' pueden acceder -->
+            <role-name>admin</role-name>
+        </auth-constraint>
+    </security-constraint>
+
+    <!-- ── Tipo de login: formulario personalizado ── -->
+    <login-config>
+        <auth-method>FORM</auth-method>
+        <realm-name>PayStream</realm-name>
+        <form-login-config>
+            <form-login-page>/inicioSesion.jsp</form-login-page>
+            <form-error-page>/inicioSesion.jsp</form-error-page>
+        </form-login-config>
+    </login-config>
+
+    <!-- ── Declaración de roles ── -->
+    <security-role>
+        <role-name>admin</role-name>
+    </security-role>
+
+</web-app>

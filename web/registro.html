@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registro de usuario</title>
+    <link rel="stylesheet" href="estilo.css" />
+    <script src="validaFormulario.js"></script>
+  </head>
+
+  <body>
+    <div class="contenedor-login">
+      <div class="caja-login tarjeta texto-centro">
+        <br />
+        <div>
+          <p class="titulo-seccion">Registro de usuario</p>
+          <p class="subtitulo-seccion">Ingresa tus datos para registrarte</p>
+        </div>
+        <form
+          class="grupo-formulario"
+          action="registroUsuario.jsp"
+          method="post"
+          onsubmit="return validaRegistro()"
+        >
+          <div class="grupo-input">
+            <label>Nombre</label>
+            <input class="input-datos" type="text" id="nombreUsuario" name="nombreUsuario" placeholder="Nombre"/>
+            <a id="mensajeErrorNombre" class="mensajeError"></a>
+          </div>
+          <div class="grupo-input">
+            <label>Apellido</label>
+            <input class="input-datos" type="text" id="apellidoUsuario" name="apellidoUsuario" placeholder="Primer apellido"/>
+            <a id="mensajeErrorApellido" class="mensajeError"></a>
+          </div>
+          <div class="grupo-input">
+            <label>Correo Electrónico</label>
+            <input class="input-datos" type="email" id="correoElectronico" name="correoElectronico" placeholder="correo@ejemplo.com"/>
+            <a id="mensajeErrorCorreo" class="mensajeError"></a>
+          </div>
+          <div class="grupo-input">
+            <label style="margin-top: 18px">Contraseña</label>
+            <input class="input-datos" type="password" id="contrasena" name="contrasena" placeholder="••••••••••"/>
+            <a id="mensajeErrorContra" class="mensajeError"></a>
+          </div>
+          <div class="grupo-input">
+            <label style="margin-top: 18px">Confirmar Contraseña</label>
+            <input class="input-datos" type="password" id="confirmaContrasena" placeholder="••••••••••"/>
+            <a id="mensajeErrorConfirma" class="mensajeError"></a>
+          </div>
+
+          <button class="boton boton-primario" style="margin-top: 20px" type="submit">
+            Registrarse
+          </button>
+
+          <button
+            class="boton boton-secundario"
+            style="margin-top: 20px"
+            type="button"
+            onclick="window.location.href='inicioSesion.jsp'"
+          >
+            Volver a Inicio de Sesión
+          </button>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>
