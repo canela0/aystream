@@ -47,7 +47,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Inicio de sesion</title>
     <link rel="stylesheet" href="estilo.css" />
-    <script src="validaFormulario.js"></script>
 </head>
 <body>
     <div class="contenedor-login">
@@ -60,18 +59,16 @@
                 <p class="titulo-seccion">Iniciar Sesion</p>
                 <p class="subtitulo-seccion">Ingresa tus datos para continuar</p>
             </div>
-            <form class="grupo-formulario" method="post" action="j_security_check">
+            <form class="grupo-formulario" method="post" action="inicioSesion.jsp">
                 <div class="grupo-input">
                     <label>Correo Electronico</label>
-                    <input class="input-datos" type="email" id="j_username" name="j_username"
+                    <input class="input-datos" type="email" id="correoElectronico" name="correoElectronico"
                            placeholder="correo@ejemplo.com"/>
-                    <a id="mensajeErrorCorreo" class="mensajeError"></a>
                 </div>
                 <div class="grupo-input">
                     <label style="margin-top: 18px">Contrasena</label>
-                    <input class="input-datos" type="password" id="j_password" name="j_password"
+                    <input class="input-datos" type="password" id="contrasena" name="contrasena"
                            placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"/>
-                    <a id="mensajeErrorContra" class="mensajeError"></a>
                 </div>
                 <% if (error) { %>
                     <p style="color:red; text-align:left;">Correo o contrasena incorrectos.</p>
