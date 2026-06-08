@@ -122,15 +122,13 @@
             if (idProducto != -1) {
                 int cantNueva = stockActual - cantidades.get(i);
 
-                // b) descontar stock e incrementar numero_compras
+                // b) descontar stock
                 PreparedStatement stUpd = con.prepareStatement(
-                    "UPDATE productos SET cantidad = cantidad - ?, " +
-                    "numero_compras = numero_compras + ? WHERE id=? AND usuario_id=?"
+                    "UPDATE productos SET cantidad = cantidad - ? WHERE id=? AND usuario_id=?"
                 );
                 stUpd.setInt(1, cantidades.get(i));
-                stUpd.setInt(2, cantidades.get(i));
-                stUpd.setInt(3, idProducto);
-                stUpd.setInt(4, usuarioId);
+                stUpd.setInt(2, idProducto);
+                stUpd.setInt(3, usuarioId);
                 stUpd.executeUpdate();
                 stUpd.close();
 
