@@ -34,9 +34,15 @@ public class ProductosServlet extends HttpServlet {
             Class.forName("com.mysql.cj.jdbc.Driver");
             con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
 
+            // si soloConStock=true (default) solo muestra productos con stock > 0
+            // si soloConStock=false muestra todos (para inventario)
+            String soloConStockStr = req.getParameter("soloConStock");
+            boolean soloConStock = !"false".equals(soloConStockStr);
+
+            String whereStock = soloConStock ? "AND cantidad > 0" : "";
             PreparedStatement st = con.prepareStatement(
-                "SELECT id, nombre, cantidad, precio FROM productos " +
-                "WHERE usuario_id=? AND cantidad > 0 ORDER BY nombre ASC"
+                "SELECT id, nombre, cantidad, precio, COALESCE(precio_costo, precio) AS precio_costo " +
+                "FROM productos WHERE usuario_id=? " + whereStock + " ORDER BY nombre ASC"
             );
             st.setInt(1, Integer.parseInt(usuarioIdStr));
             ResultSet rs = st.executeQuery();
@@ -49,7 +55,8 @@ public class ProductosServlet extends HttpServlet {
                   .append("\"id\":").append(rs.getInt("id")).append(",")
                   .append("\"nombre\":\"").append(rs.getString("nombre")).append("\",")
                   .append("\"cantidad\":").append(rs.getInt("cantidad")).append(",")
-                  .append("\"precio\":").append(rs.getDouble("precio"))
+                  .append("\"precio\":").append(rs.getDouble("precio")).append(",")
+                  .append("\"precio_costo\":").append(rs.getDouble("precio_costo"))
                   .append("}");
                 primero = false;
             }

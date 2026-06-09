@@ -79,7 +79,7 @@ public class BalanceServlet extends HttpServlet {
                 rsS.close(); stS.close();
 
                 PreparedStatement stI = con.prepareStatement(
-                    "SELECT COALESCE(SUM(cantidad_nueva*precio_nuevo),0) as inv FROM movimientos_inventario " +
+                    "SELECT COALESCE(SUM(cantidad_nueva*precio_anterior),0) as inv FROM movimientos_inventario " +
                     "WHERE usuario_id=? AND tipo_movimiento='ALTA' AND DATE(fecha) BETWEEN ? AND ?"
                 );
                 stI.setInt(1, usuarioId);
