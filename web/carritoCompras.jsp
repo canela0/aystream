@@ -51,7 +51,7 @@
 
     <h2 class="titulo-seccion">Carrito de Compras</h2>
 
-    <div class="caja-seccion tarjeta">
+    <div class="caja-seccion2 tarjeta">
 
         <%
             ArrayList<int[]> carrito =
@@ -81,7 +81,7 @@
                 try {
                     Class.forName("com.mysql.cj.jdbc.Driver");
                     con = DriverManager.getConnection(
-                        "jdbc:mysql://localhost:3306/PAYSTREAM",
+                        "jdbc:mysql://localhost:3306/payStream",
                         "root",
                         "n0m3l0"
                     );

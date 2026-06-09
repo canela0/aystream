@@ -288,7 +288,7 @@
   }
 
   function cerrarSesion() {
-    window.location.href = 'inicioSesion.jsp';
+    window.location.href = 'cerrarSesion.jsp';
   }
 
   // Cerrar dropdown al hacer clic fuera

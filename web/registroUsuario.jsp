@@ -46,7 +46,7 @@
                 stRol.executeUpdate();
                 stRol.close();
 
-                response.sendRedirect("inicioSesion.jsp");
+                response.sendRedirect("dashboard.jsp");
 
             } catch (java.sql.SQLIntegrityConstraintViolationException e) {
         %>

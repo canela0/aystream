@@ -14,17 +14,20 @@
         return;
     }
 
-    String nombre      = request.getParameter("nombre");
-    String cantidadStr = request.getParameter("cantidad");
-    String precioStr   = request.getParameter("precio");
+    String nombre         = request.getParameter("nombre");
+    String cantidadStr    = request.getParameter("cantidad");
+    String precioStr      = request.getParameter("precio");
+    String precioCostoStr = request.getParameter("precio_costo");
 
     Connection con = null;
     PreparedStatement stProd = null;
     PreparedStatement stMov  = null;
 
     try {
-        int    cantidad = Integer.parseInt(cantidadStr);
-        double precio   = Double.parseDouble(precioStr);
+        int    cantidad    = Integer.parseInt(cantidadStr);
+        double precio      = Double.parseDouble(precioStr);
+        double precioCosto = (precioCostoStr != null && !precioCostoStr.isEmpty())
+                             ? Double.parseDouble(precioCostoStr) : precio;
 
         Class.forName("com.mysql.cj.jdbc.Driver");
         con = DriverManager.getConnection(
@@ -33,13 +36,14 @@
 
         // 1. Insertar producto
         stProd = con.prepareStatement(
-            "INSERT INTO productos (usuario_id, nombre, cantidad, precio) VALUES (?, ?, ?, ?)",
+            "INSERT INTO productos (usuario_id, nombre, cantidad, precio, precio_costo) VALUES (?, ?, ?, ?, ?)",
             Statement.RETURN_GENERATED_KEYS
         );
         stProd.setInt(1, usuarioId);
         stProd.setString(2, nombre);
         stProd.setInt(3, cantidad);
         stProd.setDouble(4, precio);
+        stProd.setDouble(5, precioCosto);
         stProd.executeUpdate();
 
         // Obtener el id del producto recien insertado
@@ -47,7 +51,7 @@
         int idProducto = rsKeys.next() ? rsKeys.getInt(1) : -1;
         rsKeys.close();
 
-        // 2. Registrar movimiento tipo ALTA
+        // 2. Registrar movimiento tipo ALTA (precio_nuevo = precio de costo)
         stMov = con.prepareStatement(
             "INSERT INTO movimientos_inventario " +
             "(producto_id, usuario_id, tipo_movimiento, cantidad_nueva, precio_nuevo, descripcion) " +
@@ -56,7 +60,7 @@
         stMov.setInt(1, idProducto);
         stMov.setInt(2, usuarioId);
         stMov.setInt(3, cantidad);
-        stMov.setDouble(4, precio);
+        stMov.setDouble(4, precioCosto);
         stMov.setString(5, "Alta de producto: " + nombre);
         stMov.executeUpdate();
 %>

@@ -94,7 +94,7 @@
 
                 try {
                     Class.forName("com.mysql.cj.jdbc.Driver");
-                    con = DriverManager.getConnection("jdbc:mysql://localhost:3306/PAYSTREAM","root","n0m3l0");
+                    con = DriverManager.getConnection("jdbc:mysql://localhost:3306/payStream","root","n0m3l0");
 
                     if (nombre != null && !nombre.trim().isEmpty()) {
                         // Buscar por nombre filtrando por usuario en sesión

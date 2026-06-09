@@ -24,7 +24,7 @@
 
             try {
                 Class.forName("com.mysql.cj.jdbc.Driver");
-                conecta = DriverManager.getConnection("jdbc:mysql://localhost:3306/PAYSTREAM","root","n0m3l0");
+                conecta = DriverManager.getConnection("jdbc:mysql://localhost:3306/payStream","root","n0m3l0");
 
                 // Buscar el producto por nombre y que pertenezca al usuario en sesión
                 st = conecta.prepareStatement(

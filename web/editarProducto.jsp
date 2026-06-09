@@ -14,6 +14,7 @@
     String nombre = "";
     int cantidad = 0;
     double precio = 0;
+    double precioCosto = 0;
 
     Connection con = null;
     PreparedStatement st = null;
@@ -22,12 +23,12 @@
     try {
         Class.forName("com.mysql.cj.jdbc.Driver");
         con = DriverManager.getConnection(
-            "jdbc:mysql://localhost:3306/PAYSTREAM","root","n0m3l0"
+            "jdbc:mysql://localhost:3306/payStream","root","n0m3l0"
         );
 
         // Verificar que el producto pertenece al usuario en sesión
         st = con.prepareStatement(
-            "SELECT nombre, cantidad, precio FROM productos WHERE id = ? AND usuario_id = ?"
+            "SELECT nombre, cantidad, precio, COALESCE(precio_costo, precio) AS precio_costo FROM productos WHERE id = ? AND usuario_id = ?"
         );
         st.setInt(1, id);
         st.setInt(2, usuarioId);
@@ -37,6 +38,7 @@
             nombre = rs.getString("nombre");
             cantidad = rs.getInt("cantidad");
             precio = rs.getDouble("precio");
+            precioCosto = rs.getDouble("precio_costo");
         } else {
             // El producto no existe o no pertenece a este usuario
             response.sendRedirect("productos.html");
@@ -116,7 +118,19 @@
                 </div>
 
                 <div>
-                    <label>Precio por unidad ($)</label>
+                    <label>Precio de costo ($)</label>
+                    <input class="input-datos3"
+                           type="number"
+                           id="precio_costo"
+                           name="precio_costo"
+                           value="<%= precioCosto %>"
+                           step="0.01"
+                           min="0">
+                    <a id="mensajeErrorPrecioCosto" class="mensajeError"></a>
+                </div>
+
+                <div>
+                    <label>Precio de venta ($)</label>
                     <input class="input-datos3"
                            type="number"
                            id="precio"

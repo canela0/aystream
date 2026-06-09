@@ -55,8 +55,9 @@
                 <tr>
                   <th>Nombre del Producto</th>
                   <th>Cantidad</th>
-                  <th>Precio Unitario</th>
-                  <th>Valor Total</th>
+                  <th>Precio de Costo</th>
+                  <th>Precio de Venta</th>
+                  <th>Valor en Stock (costo)</th>
                 </tr>
               </thead>
 
@@ -70,12 +71,13 @@
                   try {
                       Class.forName("com.mysql.cj.jdbc.Driver");
                       con = DriverManager.getConnection(
-                          "jdbc:mysql://localhost:3306/PAYSTREAM", "root", "n0m3l0"
+                          "jdbc:mysql://localhost:3306/payStream", "root", "n0m3l0"
                       );
 
                       // Filtrar solo los productos del usuario en sesión
                       st = con.prepareStatement(
-                          "SELECT nombre, cantidad, precio FROM productos WHERE usuario_id = ? AND cantidad > 0 ORDER BY nombre ASC"
+                          "SELECT nombre, cantidad, precio, COALESCE(precio_costo, precio) AS precio_costo " +
+                          "FROM productos WHERE usuario_id = ? AND cantidad > 0 ORDER BY nombre ASC"
                       );
                       st.setInt(1, usuarioId);
                       rs = st.executeQuery();
@@ -84,19 +86,21 @@
                           String nombre = rs.getString("nombre");
                           int cantidad = rs.getInt("cantidad");
                           double precio = rs.getDouble("precio");
-                          double valorTotal = cantidad * precio;
+                          double precioCosto = rs.getDouble("precio_costo");
+                          double valorTotal = cantidad * precioCosto;
                           totalInventario += valorTotal;
                 %>
                 <tr>
                   <td><%= nombre %></td>
                   <td><%= cantidad %></td>
+                  <td>$<%= String.format("%.2f", precioCosto) %></td>
                   <td>$<%= String.format("%.2f", precio) %></td>
                   <td>$<%= String.format("%.2f", valorTotal) %></td>
                 </tr>
                 <%
                       }
                   } catch(Exception e) {
-                      out.println("<tr><td colspan='4'>Error: " + e.getMessage() + "</td></tr>");
+                      out.println("<tr><td colspan='5'>Error: " + e.getMessage() + "</td></tr>");
                   } finally {
                       if(rs != null) rs.close();
                       if(st != null) st.close();
@@ -108,6 +112,7 @@
               <tfoot>
                 <tr>
                   <th>Total del Inventario</th>
+                  <th></th>
                   <th></th>
                   <th></th>
                   <th>$<%= String.format("%.2f", totalInventario) %></th>

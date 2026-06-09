@@ -8,7 +8,75 @@
     <display-name>PayStream</display-name>
 
     <welcome-file-list>
-        <welcome-file>inicioSesion.jsp</welcome-file>
+        <welcome-file>dashboard.jsp</welcome-file>
     </welcome-file-list>
+
+    <!-- ============================================================ -->
+    <!--  Filtro de sesión: traduce el principal de Realm a usuarioId -->
+    <!-- ============================================================ -->
+    <filter>
+        <filter-name>SessionFilter</filter-name>
+        <filter-class>com.devbiz.filter.SessionFilter</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>SessionFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <!-- ============================================================ -->
+    <!--  Páginas protegidas: requieren rol "admin"                   -->
+    <!-- ============================================================ -->
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>Area Protegida PayStream</web-resource-name>
+            <!-- JSPs protegidos -->
+            <url-pattern>/dashboard.jsp</url-pattern>
+            <url-pattern>/balanceSemanal.jsp</url-pattern>
+            <url-pattern>/consultarProductos.jsp</url-pattern>
+            <url-pattern>/reporteInventario.jsp</url-pattern>
+            <url-pattern>/reportes.jsp</url-pattern>
+            <url-pattern>/registroProducto.jsp</url-pattern>
+            <url-pattern>/registroCompra.jsp</url-pattern>
+            <url-pattern>/editarProducto.jsp</url-pattern>
+            <url-pattern>/editarProductoAccion.jsp</url-pattern>
+            <url-pattern>/ticketCompra.jsp</url-pattern>
+            <url-pattern>/carritoCompras.jsp</url-pattern>
+            <url-pattern>/ventas.jsp</url-pattern>
+            <url-pattern>/historialVentas.jsp</url-pattern>
+            <url-pattern>/buscarProducto.jsp</url-pattern>
+            <url-pattern>/modificarProducto.jsp</url-pattern>
+            <url-pattern>/bajaProducto.jsp</url-pattern>
+            <url-pattern>/misDatos.jsp</url-pattern>
+            <!-- HTMLs protegidos -->
+            <url-pattern>/dashboard.html</url-pattern>
+            <url-pattern>/menu.html</url-pattern>
+            <url-pattern>/productos.html</url-pattern>
+            <url-pattern>/agregarProducto.html</url-pattern>
+            <url-pattern>/modificarProducto.html</url-pattern>
+            <url-pattern>/buscarProducto.html</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>admin</role-name>
+        </auth-constraint>
+    </security-constraint>
+
+    <!-- ============================================================ -->
+    <!--  Autenticación: formulario propio                            -->
+    <!-- ============================================================ -->
+    <login-config>
+        <auth-method>FORM</auth-method>
+        <realm-name>PayStream</realm-name>
+        <form-login-config>
+            <form-login-page>/inicioSesion.jsp</form-login-page>
+            <form-error-page>/inicioSesion.jsp?error=1</form-error-page>
+        </form-login-config>
+    </login-config>
+
+    <!-- ============================================================ -->
+    <!--  Rol requerido                                               -->
+    <!-- ============================================================ -->
+    <security-role>
+        <role-name>admin</role-name>
+    </security-role>
 
 </web-app>

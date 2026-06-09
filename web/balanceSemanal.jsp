@@ -69,9 +69,9 @@
             }
             rsMov.close(); stMov.close();
 
-            // 5. Valor actual del inventario (snapshot al momento de calcular)
+            // 5. Valor actual del inventario (a precio de costo)
             PreparedStatement stVI = con.prepareStatement(
-                "SELECT COALESCE(SUM(precio * cantidad), 0) FROM productos WHERE usuario_id=?");
+                "SELECT COALESCE(SUM(COALESCE(precio_costo, precio) * cantidad), 0) FROM productos WHERE usuario_id=?");
             stVI.setInt(1, usuarioId);
             ResultSet rsVI = stVI.executeQuery();
             double valorInvFin = rsVI.next() ? rsVI.getDouble(1) : 0;

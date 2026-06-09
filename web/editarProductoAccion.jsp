@@ -29,7 +29,7 @@
 
         // Leer valores actuales ANTES de modificar (necesarios para el movimiento)
         PreparedStatement stLeer = con.prepareStatement(
-            "SELECT nombre, cantidad, precio FROM productos WHERE id=? AND usuario_id=?"
+            "SELECT nombre, cantidad, precio, COALESCE(precio_costo, precio) AS precio_costo FROM productos WHERE id=? AND usuario_id=?"
         );
         stLeer.setInt(1, id);
         stLeer.setInt(2, usuarioId);
@@ -41,28 +41,33 @@
             return;
         }
 
-        String nombreAnterior  = rsLeer.getString("nombre");
+        String nombreAnterior   = rsLeer.getString("nombre");
         int    cantidadAnterior = rsLeer.getInt("cantidad");
-        double precioAnterior  = rsLeer.getDouble("precio");
+        double precioAnterior   = rsLeer.getDouble("precio");
+        double precioCostoAnterior = rsLeer.getDouble("precio_costo");
         rsLeer.close(); stLeer.close();
 
         if ("actualizar".equals(accion)) {
-            String nombreNuevo   = request.getParameter("nombre");
-            int    cantidadNueva = Integer.parseInt(request.getParameter("cantidad"));
-            double precioNuevo   = Double.parseDouble(request.getParameter("precio"));
+            String nombreNuevo      = request.getParameter("nombre");
+            int    cantidadNueva    = Integer.parseInt(request.getParameter("cantidad"));
+            double precioNuevo      = Double.parseDouble(request.getParameter("precio"));
+            String precioCostoParam = request.getParameter("precio_costo");
+            double precioCostoNuevo = (precioCostoParam != null && !precioCostoParam.isEmpty())
+                                      ? Double.parseDouble(precioCostoParam) : precioCostoAnterior;
 
             // 1. Actualizar producto
             st = con.prepareStatement(
-                "UPDATE productos SET nombre=?, cantidad=?, precio=? WHERE id=? AND usuario_id=?"
+                "UPDATE productos SET nombre=?, cantidad=?, precio=?, precio_costo=? WHERE id=? AND usuario_id=?"
             );
             st.setString(1, nombreNuevo);
             st.setInt(2, cantidadNueva);
             st.setDouble(3, precioNuevo);
-            st.setInt(4, id);
-            st.setInt(5, usuarioId);
+            st.setDouble(4, precioCostoNuevo);
+            st.setInt(5, id);
+            st.setInt(6, usuarioId);
             st.executeUpdate();
 
-            // 2. Registrar movimiento tipo AJUSTE
+            // 2. Registrar movimiento tipo AJUSTE (precio_anterior/nuevo = precio de costo)
             stMov = con.prepareStatement(
                 "INSERT INTO movimientos_inventario " +
                 "(producto_id, usuario_id, tipo_movimiento, " +
@@ -73,14 +78,14 @@
             stMov.setInt(2, usuarioId);
             stMov.setInt(3, cantidadAnterior);
             stMov.setInt(4, cantidadNueva);
-            stMov.setDouble(5, precioAnterior);
-            stMov.setDouble(6, precioNuevo);
+            stMov.setDouble(5, precioCostoAnterior);
+            stMov.setDouble(6, precioCostoNuevo);
             stMov.setString(7, "Ajuste manual: " + nombreAnterior + " -> " + nombreNuevo);
             stMov.executeUpdate();
 
         } else if ("eliminar".equals(accion)) {
 
-            // 1. Registrar movimiento tipo BAJA antes de eliminar
+            // 1. Registrar movimiento tipo BAJA antes de eliminar (precio_anterior = precio de costo)
             stMov = con.prepareStatement(
                 "INSERT INTO movimientos_inventario " +
                 "(producto_id, usuario_id, tipo_movimiento, " +
@@ -90,7 +95,7 @@
             stMov.setInt(1, id);
             stMov.setInt(2, usuarioId);
             stMov.setInt(3, cantidadAnterior);
-            stMov.setDouble(4, precioAnterior);
+            stMov.setDouble(4, precioCostoAnterior);
             stMov.setString(5, "Baja de producto: " + nombreAnterior);
             stMov.executeUpdate();
 
