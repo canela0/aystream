@@ -31,9 +31,7 @@
 
     try {
         Class.forName("com.mysql.cj.jdbc.Driver");
-        con = DriverManager.getConnection(
-            "jdbc:mysql://localhost:3306/payStream", "root", "n0m3l0"
-        );
+        con = com.devbiz.util.DB.getConnection();
 
         // ── Paso 1: Recopilar datos de cada item del carrito ──────────────
         for (int[] item : carrito) {

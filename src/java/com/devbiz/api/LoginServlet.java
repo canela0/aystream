@@ -1,16 +1,15 @@
 package com.devbiz.api;
 
+import com.devbiz.util.DB;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import java.io.*;
+import java.math.BigInteger;
+import java.security.MessageDigest;
 import java.sql.*;
 
 @WebServlet("/api/login")
 public class LoginServlet extends HttpServlet {
-
-    private static final String DB_URL  = "jdbc:mysql://localhost:3306/payStream";
-    private static final String DB_USER = "root";
-    private static final String DB_PASS = "n0m3l0";
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse res)
@@ -32,15 +31,14 @@ public class LoginServlet extends HttpServlet {
 
         Connection con = null;
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
+            con = DB.getConnection();
 
             PreparedStatement st = con.prepareStatement(
                 "SELECT id, nombre, apellido, correo FROM usuarios " +
                 "WHERE correo=? AND contrasena=?"
             );
             st.setString(1, correo.trim());
-            st.setString(2, contrasena.trim());
+            st.setString(2, sha256(contrasena.trim()));
             ResultSet rs = st.executeQuery();
 
             if (rs.next()) {
@@ -63,6 +61,17 @@ public class LoginServlet extends HttpServlet {
         } finally {
             if (con != null) try { con.close(); } catch (Exception e) {}
         }
+    }
+
+    private String sha256(String input) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            byte[] hash = md.digest(input.getBytes("UTF-8"));
+            BigInteger bi = new BigInteger(1, hash);
+            String hex = bi.toString(16);
+            while (hex.length() < 64) hex = "0" + hex;
+            return hex;
+        } catch (Exception e) { return input; }
     }
 
     @Override

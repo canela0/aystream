@@ -24,9 +24,7 @@
             if (motivo == null || motivo.trim().isEmpty()) motivo = "Baja manual";
 
             Class.forName("com.mysql.cj.jdbc.Driver");
-            con = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/payStream", "root", "n0m3l0"
-            );
+            con = com.devbiz.util.DB.getConnection();
 
             // Verificar stock actual
             PreparedStatement stSel = con.prepareStatement(
@@ -165,9 +163,32 @@
       margin-top: 8px;
     }
     .btn-baja:hover { background: #dc2626; }
+
+    /* ── Toast ── */
+    .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+    .toast { display: flex; align-items: center; gap: 12px; padding: 14px 18px; border-radius: 10px; font-size: 13px; font-weight: 500; box-shadow: 0 8px 24px rgba(0,0,0,.15); animation: slideIn .3s ease; min-width: 280px; max-width: 380px; }
+    .toast.ok  { background: #166534; color: #fff; }
+    .toast.err { background: #991b1b; color: #fff; }
+    .toast-icon { font-size: 16px; flex-shrink: 0; }
+    .toast-close { margin-left: auto; background: transparent; border: none; color: inherit; cursor: pointer; opacity: .7; font-size: 16px; padding: 0; }
+    .toast-close:hover { opacity: 1; }
+    @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    @keyframes slideOut { to { transform: translateX(120%); opacity: 0; } }
+
+    /* ── Modal confirmación ── */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1000; align-items: center; justify-content: center; }
+    .modal-overlay.visible { display: flex; }
+    .modal-box { background: #fff; border-radius: 14px; padding: 28px 32px; max-width: 400px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,.2); text-align: center; }
+    .modal-icon { font-size: 40px; margin-bottom: 12px; }
+    .modal-title { font-size: 18px; font-weight: 700; color: #111827; margin-bottom: 8px; }
+    .modal-msg { font-size: 14px; color: #6b7280; margin-bottom: 24px; line-height: 1.5; }
+    .modal-actions { display: flex; gap: 10px; justify-content: center; }
+    .modal-cancel { padding: 9px 22px; border: 1.5px solid #D1D5DB; border-radius: 8px; background: #fff; font-size: 14px; font-weight: 600; cursor: pointer; color: #374151; }
+    .modal-confirm { padding: 9px 22px; border: none; border-radius: 8px; background: #dc2626; color: #fff; font-size: 14px; font-weight: 600; cursor: pointer; }
   </style>
 </head>
 <body>
+<div class="toast-container" id="toastContainer"></div>
 <div class="baja-page">
 
   <div class="baja-header">
@@ -197,11 +218,9 @@
             Connection conList = null;
             try {
               Class.forName("com.mysql.cj.jdbc.Driver");
-              conList = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/payStream", "root", "n0m3l0"
-              );
+              conList = com.devbiz.util.DB.getConnection();
               PreparedStatement stList = conList.prepareStatement(
-                "SELECT id, nombre, cantidad FROM productos WHERE usuario_id=? ORDER BY nombre ASC"
+                "SELECT id, nombre, cantidad FROM productos WHERE usuario_id=? AND cantidad > 0 ORDER BY nombre ASC"
               );
               stList.setInt(1, usuarioId);
               ResultSet rsList = stList.executeQuery();
@@ -246,8 +265,21 @@
         </div>
       </div>
 
-      <button class="btn-baja" type="submit">Registrar baja</button>
+      <button class="btn-baja" type="button" onclick="pedirConfirmacion()">Registrar baja</button>
     </form>
+
+    <!-- Modal confirmación -->
+    <div class="modal-overlay" id="modalConfirm">
+      <div class="modal-box">
+        <div class="modal-icon">⚠️</div>
+        <div class="modal-title">¿Confirmar baja?</div>
+        <div class="modal-msg" id="modalMsg">¿Estás seguro de que deseas registrar esta baja? Esta acción no se puede deshacer.</div>
+        <div class="modal-actions">
+          <button class="modal-cancel" onclick="cerrarModal()">Cancelar</button>
+          <button class="modal-confirm" onclick="confirmarBaja()">Sí, registrar baja</button>
+        </div>
+      </div>
+    </div>
 
   </div>
 </div>
@@ -272,10 +304,41 @@
     document.getElementById('motivo').value = texto;
   }
 
+  // Modal confirmación
+  function pedirConfirmacion() {
+    const form = document.querySelector('form');
+    const prod = document.getElementById('selectProducto');
+    const cant = document.getElementById('cantidad');
+    if (!form.checkValidity()) { form.reportValidity(); return; }
+    const opcion = prod.options[prod.selectedIndex];
+    const nombre = opcion ? opcion.text.split(' (stock:')[0].trim() : '';
+    document.getElementById('modalMsg').textContent =
+      '¿Dar de baja ' + cant.value + ' unidad(es) de "' + nombre + '"? Esta acción no se puede deshacer.';
+    document.getElementById('modalConfirm').classList.add('visible');
+  }
+  function cerrarModal() { document.getElementById('modalConfirm').classList.remove('visible'); }
+  function confirmarBaja() { document.querySelector('form').submit(); }
+
+  // Toast
+  function showToast(msg, tipo) {
+    const cont = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = 'toast ' + tipo;
+    var icono = tipo === 'ok' ? '✓' : '✗';
+    t.innerHTML = '<span class="toast-icon">' + icono + '</span><span>' + msg + '</span><button class="toast-close" onclick="this.parentElement.remove()">&#x2715;</button>';
+    cont.appendChild(t);
+    setTimeout(() => { t.style.animation = 'slideOut .3s ease forwards'; setTimeout(() => t.remove(), 300); }, 4000);
+  }
+
   // Mostrar stock si ya hay producto seleccionado (tras submit con error)
   window.addEventListener('DOMContentLoaded', () => {
     const sel = document.getElementById('selectProducto');
     if (sel.value) mostrarStock(sel);
+    <% if (mensajeOk != null) { %>
+      showToast('<%= mensajeOk.replace("'", "\\'") %>', 'ok');
+    <% } else if (mensajeErr != null) { %>
+      showToast('<%= mensajeErr.replace("'", "\\'") %>', 'err');
+    <% } %>
   });
 </script>
 </body>

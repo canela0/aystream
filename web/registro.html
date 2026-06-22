@@ -1,67 +1,230 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Registro de usuario</title>
-    <link rel="stylesheet" href="estilo.css" />
-    <script src="validaFormulario.js"></script>
-  </head>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crear cuenta – PayStream</title>
+  <link rel="stylesheet" href="estilo.css" />
+  <style>
+    /* ── Ojo mostrar/ocultar ── */
+    .input-pass-wrap { position: relative; }
+    .input-pass-wrap .input-datos { width: 100%; box-sizing: border-box; padding-right: 42px; }
+    .btn-ojo {
+      position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; color: #9CA3AF; padding: 4px;
+      display: flex; align-items: center; transition: color .15s;
+    }
+    .btn-ojo:hover { color: #374151; }
 
-  <body>
-    <div class="contenedor-login">
-      <div class="caja-login tarjeta texto-centro">
-        <br />
-        <div>
-          <p class="titulo-seccion">Registro de usuario</p>
-          <p class="subtitulo-seccion">Ingresa tus datos para registrarte</p>
-        </div>
-        <form
-          class="grupo-formulario"
-          action="registroUsuario.jsp"
-          method="post"
-          onsubmit="return validaRegistro()"
-        >
-          <div class="grupo-input">
-            <label>Nombre</label>
-            <input class="input-datos" type="text" id="nombreUsuario" name="nombreUsuario" placeholder="Nombre"/>
-            <a id="mensajeErrorNombre" class="mensajeError"></a>
-          </div>
-          <div class="grupo-input">
-            <label>Apellido</label>
-            <input class="input-datos" type="text" id="apellidoUsuario" name="apellidoUsuario" placeholder="Primer apellido"/>
-            <a id="mensajeErrorApellido" class="mensajeError"></a>
-          </div>
-          <div class="grupo-input">
-            <label>Correo Electrónico</label>
-            <input class="input-datos" type="email" id="correoElectronico" name="correoElectronico" placeholder="correo@ejemplo.com"/>
-            <a id="mensajeErrorCorreo" class="mensajeError"></a>
-          </div>
-          <div class="grupo-input">
-            <label style="margin-top: 18px">Contraseña</label>
-            <input class="input-datos" type="password" id="contrasena" name="contrasena" placeholder="••••••••••"/>
-            <a id="mensajeErrorContra" class="mensajeError"></a>
-          </div>
-          <div class="grupo-input">
-            <label style="margin-top: 18px">Confirmar Contraseña</label>
-            <input class="input-datos" type="password" id="confirmaContrasena" placeholder="••••••••••"/>
-            <a id="mensajeErrorConfirma" class="mensajeError"></a>
-          </div>
+    /* ── Medidor de fuerza ── */
+    .strength-wrap { margin-top: 8px; }
+    .strength-bars { display: flex; gap: 4px; margin-bottom: 6px; }
+    .strength-bar { flex: 1; height: 4px; border-radius: 99px; background: #E5E7EB; transition: background .3s; }
+    .strength-bar.activa.debil  { background: #EF4444; }
+    .strength-bar.activa.media  { background: #F59E0B; }
+    .strength-bar.activa.fuerte { background: #10B981; }
+    .strength-label { font-size: 12px; color: #6B7280; }
 
-          <button class="boton boton-primario" style="margin-top: 20px" type="submit">
-            Registrarse
-          </button>
-
-          <button
-            class="boton boton-secundario"
-            style="margin-top: 20px"
-            type="button"
-            onclick="window.location.href='inicioSesion.jsp'"
-          >
-            Volver a Inicio de Sesión
-          </button>
-        </form>
+    /* ── Requisitos ── */
+    .requisitos { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
+    .req { font-size: 12px; color: #9CA3AF; display: flex; align-items: center; gap: 6px; transition: color .2s; }
+    .req.ok { color: #10B981; }
+    .req-icon { font-size: 11px; }
+  </style>
+</head>
+<body>
+  <div class="contenedor-login">
+    <div class="caja-login tarjeta texto-centro">
+      <br/>
+      <div>
+        <p class="titulo-seccion">Crear cuenta</p>
+        <p class="subtitulo-seccion">Ingresa tus datos para registrarte</p>
       </div>
+
+      <form class="grupo-formulario" action="registroUsuario.jsp" method="post" onsubmit="return validarFormulario()">
+
+        <div class="grupo-input">
+          <label>Nombre</label>
+          <input class="input-datos" type="text" id="nombreUsuario" name="nombreUsuario" placeholder="Tu nombre"/>
+          <a id="mensajeErrorNombre" class="mensajeError"></a>
+        </div>
+
+        <div class="grupo-input">
+          <label>Apellido</label>
+          <input class="input-datos" type="text" id="apellidoUsuario" name="apellidoUsuario" placeholder="Tu apellido"/>
+          <a id="mensajeErrorApellido" class="mensajeError"></a>
+        </div>
+
+        <div class="grupo-input">
+          <label>Correo electrónico</label>
+          <input class="input-datos" type="email" id="correoElectronico" name="correoElectronico" placeholder="correo@ejemplo.com"/>
+          <a id="mensajeErrorCorreo" class="mensajeError"></a>
+        </div>
+
+        <div class="grupo-input">
+          <label>Contraseña</label>
+          <div class="input-pass-wrap">
+            <input class="input-datos" type="password" id="contrasena" name="contrasena"
+                   placeholder="••••••••" oninput="evaluarFuerza(this.value)"/>
+            <button type="button" class="btn-ojo" onclick="toggleOjo('contrasena', this)" tabindex="-1">
+              <svg id="ojo-contrasena" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Medidor de fuerza -->
+          <div class="strength-wrap">
+            <div class="strength-bars">
+              <div class="strength-bar" id="sb1"></div>
+              <div class="strength-bar" id="sb2"></div>
+              <div class="strength-bar" id="sb3"></div>
+              <div class="strength-bar" id="sb4"></div>
+            </div>
+            <div class="strength-label" id="strengthLabel">Escribe tu contraseña</div>
+          </div>
+
+          <!-- Requisitos -->
+          <div class="requisitos">
+            <div class="req" id="req-len"><span class="req-icon">○</span> Mínimo 8 caracteres</div>
+            <div class="req" id="req-upper"><span class="req-icon">○</span> Al menos una mayúscula</div>
+            <div class="req" id="req-num"><span class="req-icon">○</span> Al menos un número</div>
+            <div class="req" id="req-sym"><span class="req-icon">○</span> Al menos un símbolo (!@#$...)</div>
+          </div>
+          <a id="mensajeErrorContra" class="mensajeError"></a>
+        </div>
+
+        <div class="grupo-input">
+          <label>Confirmar contraseña</label>
+          <div class="input-pass-wrap">
+            <input class="input-datos" type="password" id="confirmaContrasena" name="confirmaContrasena"
+                   placeholder="••••••••" oninput="verificarCoincidencia()"/>
+            <button type="button" class="btn-ojo" onclick="toggleOjo('confirmaContrasena', this)" tabindex="-1">
+              <svg id="ojo-confirmaContrasena" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+            </button>
+          </div>
+          <a id="mensajeErrorConfirma" class="mensajeError"></a>
+        </div>
+
+        <button class="boton boton-primario" style="margin-top:20px" type="submit">Crear cuenta</button>
+        <button class="boton boton-secundario" style="margin-top:10px" type="button"
+                onclick="location.href='inicioSesion.jsp'">Ya tengo cuenta</button>
+      </form>
     </div>
-  </body>
+  </div>
+
+  <script>
+    // ── Ojo ──
+    function toggleOjo(id, btn) {
+      var inp = document.getElementById(id);
+      var svg = btn.querySelector('svg');
+      if (inp.type === 'password') {
+        inp.type = 'text';
+        svg.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
+      } else {
+        inp.type = 'password';
+        svg.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+      }
+    }
+
+    // ── Detección de secuencias ──
+    function tieneSecuencia(val) {
+      var v = val.toLowerCase();
+      var nums  = '0123456789012';
+      var alfaN = 'abcdefghijklmnopqrstuvwxyzabcd';
+      for (var i = 0; i < v.length - 2; i++) {
+        var t = v.slice(i, i+3);
+        if (nums.includes(t) || alfaN.includes(t)) return true;
+        var tr = t.split('').reverse().join('');
+        if (nums.includes(tr) || alfaN.includes(tr)) return true;
+        if (t[0] === t[1] && t[1] === t[2]) return true;
+      }
+      return false;
+    }
+
+    // ── Fuerza ──
+    function evaluarFuerza(val) {
+      var len   = val.length >= 8;
+      var upper = /[A-Z]/.test(val);
+      var num   = /[0-9]/.test(val);
+      var sym   = /[^A-Za-z0-9]/.test(val);
+      var noSeq = val.length > 0 && !tieneSecuencia(val);
+
+      setReq('req-len',   len);
+      setReq('req-upper', upper);
+      setReq('req-num',   num);
+      setReq('req-sym',   sym);
+
+      var score  = [len, upper, num, sym, noSeq].filter(Boolean).length;
+      var barras = Math.min(4, Math.floor(score * 4 / 5));
+      var cls    = barras <= 1 ? 'debil' : (barras <= 2 ? 'media' : 'fuerte');
+      var labels = {0:'Muy débil', 1:'Débil', 2:'Regular', 3:'Buena', 4:'Fuerte'};
+
+      ['sb1','sb2','sb3','sb4'].forEach(function(b, i) {
+        document.getElementById(b).className = 'strength-bar' + (i < barras ? ' activa ' + cls : '');
+      });
+
+      var lbl = document.getElementById('strengthLabel');
+      if (val.length === 0) {
+        lbl.textContent = 'Escribe tu contraseña';
+        lbl.style.color = '';
+      } else if (tieneSecuencia(val)) {
+        lbl.textContent = 'Contiene secuencias (123, abc...) — cámbiala';
+        lbl.style.color = '#DC2626';
+      } else {
+        lbl.textContent = labels[barras];
+        lbl.style.color = '';
+      }
+    }
+
+    function setReq(id, ok) {
+      var el = document.getElementById(id);
+      el.className = 'req' + (ok ? ' ok' : '');
+      el.querySelector('.req-icon').textContent = ok ? '✓' : '○';
+    }
+
+    // ── Validación ──
+    function validarFormulario() {
+      var ok = true;
+      limpiarErrores();
+
+      var nombre   = document.getElementById('nombreUsuario').value.trim();
+      var apellido = document.getElementById('apellidoUsuario').value.trim();
+      var correo   = document.getElementById('correoElectronico').value.trim();
+      var pass     = document.getElementById('contrasena').value;
+      var confirma = document.getElementById('confirmaContrasena').value;
+
+      if (!nombre)   { mostrarError('mensajeErrorNombre',   'El nombre es obligatorio'); ok = false; }
+      if (!apellido) { mostrarError('mensajeErrorApellido', 'El apellido es obligatorio'); ok = false; }
+      if (!correo)   { mostrarError('mensajeErrorCorreo',   'El correo es obligatorio'); ok = false; }
+
+      if (pass.length < 8)               { mostrarError('mensajeErrorContra', 'Mínimo 8 caracteres'); ok = false; }
+      else if (!/[A-Z]/.test(pass))      { mostrarError('mensajeErrorContra', 'Necesita al menos una mayúscula'); ok = false; }
+      else if (!/[0-9]/.test(pass))      { mostrarError('mensajeErrorContra', 'Necesita al menos un número'); ok = false; }
+      else if (tieneSecuencia(pass))     { mostrarError('mensajeErrorContra', 'No uses secuencias como "123" o "abc"'); ok = false; }
+
+      if (ok && pass !== confirma) { mostrarError('mensajeErrorConfirma', 'Las contraseñas no coinciden'); ok = false; }
+
+      return ok;
+    }
+
+    function verificarCoincidencia() {
+      var p = document.getElementById('contrasena').value;
+      var c = document.getElementById('confirmaContrasena').value;
+      var err = document.getElementById('mensajeErrorConfirma');
+      if (c.length === 0) { err.textContent = ''; return; }
+      err.textContent = p === c ? '' : 'Las contraseñas no coinciden';
+    }
+
+    function mostrarError(id, msg) { document.getElementById(id).textContent = msg; }
+    function limpiarErrores() {
+      ['mensajeErrorNombre','mensajeErrorApellido','mensajeErrorCorreo',
+       'mensajeErrorContra','mensajeErrorConfirma'].forEach(function(id) {
+        document.getElementById(id).textContent = '';
+      });
+    }
+  </script>
+</body>
 </html>

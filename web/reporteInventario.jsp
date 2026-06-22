@@ -10,6 +10,33 @@
     // Filtro por tipo recibido por GET (puede ser null = todos)
     String filtro = request.getParameter("tipo");
     if (filtro == null) filtro = "TODOS";
+
+    // Totales para las tarjetas de resumen
+    int totalAltas = 0, totalBajas = 0, totalAjustes = 0, totalVentas = 0;
+    double inversionNeta = 0;
+    try {
+        Class.forName("com.mysql.cj.jdbc.Driver");
+        java.sql.Connection conRes = com.devbiz.util.DB.getConnection();
+        java.sql.PreparedStatement stRes = conRes.prepareStatement(
+            "SELECT tipo_movimiento, COUNT(*) AS cnt, " +
+            "       SUM(CASE WHEN tipo_movimiento='ALTA' THEN cantidad_nueva * COALESCE(precio_nuevo,0) ELSE 0 END) AS inv_alta, " +
+            "       SUM(CASE WHEN tipo_movimiento='VENTA' THEN (cantidad_anterior - COALESCE(cantidad_nueva,0)) * COALESCE(precio_anterior,0) ELSE 0 END) AS ing_venta, " +
+            "       SUM(CASE WHEN tipo_movimiento='BAJA' THEN (cantidad_anterior - COALESCE(cantidad_nueva,0)) * COALESCE(precio_anterior,0) ELSE 0 END) AS perd_baja " +
+            "FROM movimientos_inventario WHERE usuario_id = ? GROUP BY tipo_movimiento");
+        stRes.setInt(1, usuarioId);
+        java.sql.ResultSet rsRes = stRes.executeQuery();
+        double totalInv = 0, totalIng = 0, totalPerd = 0;
+        while (rsRes.next()) {
+            String t = rsRes.getString("tipo_movimiento");
+            int cnt = rsRes.getInt("cnt");
+            if ("ALTA".equals(t))   { totalAltas   = cnt; totalInv  = rsRes.getDouble("inv_alta"); }
+            if ("BAJA".equals(t))   { totalBajas   = cnt; totalPerd = rsRes.getDouble("perd_baja"); }
+            if ("AJUSTE".equals(t)) { totalAjustes = cnt; }
+            if ("VENTA".equals(t))  { totalVentas  = cnt; totalIng  = rsRes.getDouble("ing_venta"); }
+        }
+        inversionNeta = totalIng - totalInv - totalPerd;
+        rsRes.close(); stRes.close(); conRes.close();
+    } catch (Exception ignored) {}
 %>
 <!DOCTYPE html>
 <html>
@@ -19,6 +46,32 @@
     <title>Movimientos de Inventario - PayStream</title>
     <link rel="stylesheet" href="estilo.css" />
     <style>
+      .page-header { padding: 28px 40px 20px; border-bottom: 1px solid #E5E7EB; margin-bottom: 8px; }
+      .page-header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+      .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #6B7280; }
+      .breadcrumb a { color: #2563EB; text-decoration: none; }
+      .breadcrumb a:hover { text-decoration: underline; }
+      .breadcrumb-actual { color: #111827; font-weight: 600; }
+      .page-title { font-size: 24px; font-weight: 700; color: #111827; margin: 0 0 4px; }
+      .page-subtitle { font-size: 13px; color: #6B7280; margin: 0; }
+      .btn-back {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: white; border: 1.5px solid #D1D5DB; border-radius: 999px;
+        padding: 7px 18px 7px 12px; font-size: 13px; font-weight: 600;
+        color: #374151; cursor: pointer; text-decoration: none;
+        transition: all 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,.06);
+      }
+      .btn-back:hover {
+        background: #EFF6FF; border-color: #2563EB; color: #2563EB;
+        box-shadow: 0 4px 12px rgba(37,99,235,.15); transform: translateX(-3px);
+      }
+      .btn-back .arrow-icon {
+        width: 24px; height: 24px; border-radius: 50%;
+        background: #F3F4F6; display: flex; align-items: center; justify-content: center;
+        font-size: 14px; transition: background 0.2s;
+      }
+      .btn-back:hover .arrow-icon { background: #DBEAFE; }
+
       .filtros { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
       .btn-filtro {
         padding: 6px 16px; border-radius: 20px; border: 1px solid #D1D5DB;
@@ -35,28 +88,80 @@
       .sin-datos    { text-align:center; color:#9CA3AF; padding:40px; }
       .variacion-pos { color: #16A34A; font-weight: 600; }
       .variacion-neg { color: #DC2626; font-weight: 600; }
+
+      .resumen-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+      .resumen-card { border-radius: 12px; padding: 16px 20px; display: flex; flex-direction: column; gap: 4px; }
+      .resumen-card .rc-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; opacity: .75; }
+      .resumen-card .rc-valor { font-size: 26px; font-weight: 700; }
+      .resumen-card .rc-sub   { font-size: 12px; opacity: .7; }
+      .rc-altas   { background: #DCFCE7; color: #166534; }
+      .rc-bajas   { background: #FEE2E2; color: #991B1B; }
+      .rc-ajustes { background: #FEF9C3; color: #854D0E; }
+      .rc-neta    { background: #EFF6FF; color: #1D4ED8; }
+
+      table { table-layout: auto; width: 100%; }
+      table th, table td { white-space: nowrap; vertical-align: middle; padding: 10px 12px; }
+      table th:nth-child(3), table td:nth-child(3) { text-align: center; }
+      table th:nth-child(4), table td:nth-child(4) { text-align: center; }
+      table th:nth-child(5), table td:nth-child(5) { text-align: center; }
+      table th:nth-child(6), table td:nth-child(6) { text-align: center; }
+      table th:nth-child(7), table td:nth-child(7) { text-align: right; }
+      table th:nth-child(8), table td:nth-child(8) { text-align: right; }
+      /* Permitir scroll horizontal si la tabla es muy ancha en pantallas pequeñas */
+      .tabla-wrap { overflow-x: auto; }
     </style>
   </head>
   <body class="inicio">
     <section class="inicio-seccion">
 
-      <div class="boton-volver">
-        <input type="button" class="boton boton-borde"
-               value="← Volver al menu"
-               onclick="location.href='menu.html'" />
-      </div>
-      <div class="boton-volver2">
-        <input type="button" class="boton boton-borde"
-               value="← Volver"
-               onclick="location.href='reportes.jsp'" />
-        <h2 class="titulo-seccion">Movimientos de Inventario</h2>
+      <div class="page-header">
+        <div class="page-header-top">
+          <nav class="breadcrumb">
+            <a href="menu.jsp" class="btn-back" style="padding:6px 14px 6px 10px; font-size:12px;">
+              <span class="arrow-icon" style="width:20px;height:20px;font-size:12px;">⌂</span>
+              Inicio
+            </a>
+            <span>›</span>
+            <a href="reportes.jsp" class="btn-back" style="padding:6px 14px 6px 10px; font-size:12px;">
+              <span class="arrow-icon" style="width:20px;height:20px;font-size:12px;">←</span>
+              Reportes
+            </a>
+            <span>›</span>
+            <span class="breadcrumb-actual">Inventario</span>
+          </nav>
+          <a href="reportes.jsp" class="btn-back">
+            <span class="arrow-icon">←</span>
+            Volver
+          </a>
+        </div>
+        <h2 class="page-title">Movimientos de Inventario</h2>
+        <p class="page-subtitle">Historial completo de altas, bajas, ajustes y ventas</p>
       </div>
 
       <div class="grupo-formulario2">
         <div class="caja-seccion2 tarjeta">
-          <div class="texto-centro">
-            <p class="titulo-seccion2">Historial de cambios al inventario</p>
-            <p class="subtitulo-seccion2">Altas, bajas, ajustes manuales y descuentos por venta</p>
+          <%-- Tarjetas de resumen --%>
+          <div class="resumen-grid">
+            <div class="resumen-card rc-altas">
+              <span class="rc-label">Altas</span>
+              <span class="rc-valor"><%= totalAltas %></span>
+              <span class="rc-sub">entradas de stock</span>
+            </div>
+            <div class="resumen-card rc-bajas">
+              <span class="rc-label">Bajas</span>
+              <span class="rc-valor"><%= totalBajas %></span>
+              <span class="rc-sub">salidas manuales</span>
+            </div>
+            <div class="resumen-card rc-ajustes">
+              <span class="rc-label">Ventas</span>
+              <span class="rc-valor"><%= totalVentas %></span>
+              <span class="rc-sub">ventas registradas</span>
+            </div>
+            <div class="resumen-card rc-neta">
+              <span class="rc-label">Balance neto</span>
+              <span class="rc-valor"><%= (inversionNeta >= 0 ? "+" : "") + String.format("$%.2f", inversionNeta) %></span>
+              <span class="rc-sub">ingresos - inversión</span>
+            </div>
           </div>
 
           <%-- Botones de filtro --%>
@@ -75,9 +180,7 @@
 
             try {
               Class.forName("com.mysql.cj.jdbc.Driver");
-              con = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/payStream", "root", "n0m3l0"
-              );
+              con = com.devbiz.util.DB.getConnection();
 
               String sql =
                 "SELECT m.id, p.nombre AS producto, m.tipo_movimiento, " +
@@ -103,6 +206,7 @@
               boolean hayDatos = false;
           %>
 
+          <div class="tabla-wrap">
           <table>
             <thead>
               <tr>
@@ -192,6 +296,7 @@
             %>
             </tbody>
           </table>
+          </div>
 
           <%
             } catch (Exception e) {

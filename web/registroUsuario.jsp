@@ -1,7 +1,19 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
-<%@page import="java.sql.Connection"%>
-<%@page import="java.sql.DriverManager"%>
-<%@page import="java.sql.PreparedStatement"%>
+<%@page import="java.sql.*"%>
+<%@page import="java.security.MessageDigest"%>
+<%@page import="java.math.BigInteger"%>
+<%!
+  private String sha256(String input) {
+    try {
+      java.security.MessageDigest md = java.security.MessageDigest.getInstance("SHA-256");
+      byte[] hash = md.digest(input.getBytes("UTF-8"));
+      java.math.BigInteger bi = new java.math.BigInteger(1, hash);
+      String hex = bi.toString(16);
+      while (hex.length() < 64) hex = "0" + hex;
+      return hex;
+    } catch (Exception e) { return input; }
+  }
+%>
 <html>
     <head>
         <meta charset="UTF-8"/>
@@ -27,7 +39,7 @@
 
             try {
                 Class.forName("com.mysql.cj.jdbc.Driver");
-                conecta = DriverManager.getConnection("jdbc:mysql://localhost:3306/payStream", "root", "n0m3l0");
+                conecta = com.devbiz.util.DB.getConnection();
 
                 st = conecta.prepareStatement(
                     "INSERT INTO usuarios (nombre, apellido, correo, contrasena) VALUES (?, ?, ?, ?)"
@@ -35,7 +47,7 @@
                 st.setString(1, nombre.trim());
                 st.setString(2, apellido.trim());
                 st.setString(3, correo.trim());
-                st.setString(4, contrasena.trim());
+                st.setString(4, sha256(contrasena.trim()));
                 st.executeUpdate();
 
                 // Asignar rol admin para que el Realm permita el acceso

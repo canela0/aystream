@@ -1,5 +1,6 @@
 package com.devbiz.filter;
 
+import com.devbiz.util.DB;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import java.io.IOException;
@@ -32,10 +33,7 @@ public class SessionFilter implements Filter {
             String correo = principal.getName();
             Connection con = null;
             try {
-                Class.forName("com.mysql.cj.jdbc.Driver");
-                con = DriverManager.getConnection(
-                    "jdbc:mysql://localhost:3306/payStream", "root", "n0m3l0"
-                );
+                con = DB.getConnection();
                 PreparedStatement st = con.prepareStatement(
                     "SELECT id, nombre FROM usuarios WHERE correo = ?"
                 );

@@ -7,6 +7,18 @@
     <meta name="viewport" content="width=device-width initial-scale=1.0" />
     <title>Modificar Productos</title>
     <link rel="stylesheet" href="estilo.css" />
+    <style>
+      .page-header { padding: 28px 40px 20px; border-bottom: 1px solid #E5E7EB; margin-bottom: 8px; }
+      .page-header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+      .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #6B7280; }
+      .breadcrumb-actual { color: #111827; font-weight: 600; }
+      .page-title { font-size: 24px; font-weight: 700; color: #111827; margin: 0 0 4px; }
+      .page-subtitle { font-size: 13px; color: #6B7280; margin: 0; }
+      .btn-nav { display: inline-flex; align-items: center; gap: 6px; background: white; border: 1.5px solid #D1D5DB; border-radius: 999px; padding: 6px 14px 6px 10px; font-size: 12px; font-weight: 600; color: #374151; cursor: pointer; text-decoration: none; transition: all 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+      .btn-nav:hover { background: #EFF6FF; border-color: #2563EB; color: #2563EB; box-shadow: 0 4px 12px rgba(37,99,235,.15); transform: translateX(-3px); }
+      .btn-nav .nav-icon { width: 20px; height: 20px; border-radius: 50%; background: #F3F4F6; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; transition: background 0.2s; }
+      .btn-nav:hover .nav-icon { background: #DBEAFE; }
+    </style>
   </head>
 
   <body class="inicio">
@@ -21,23 +33,19 @@
         }
       %>
 
-      <div class="boton-volver">
-        <input
-          type="button"
-          class="boton boton-borde"
-          value="← Volver al menú"
-          onclick="location.href='menu.html';"
-        />
-      </div>
-
-      <div class="boton-volver2">
-        <input
-          type="button"
-          class="boton boton-borde"
-          value="← Volver"
-          onclick="location.href='productos.html';"
-        />
-        <h2 class="titulo-seccion">Modificar Producto</h2>
+      <div class="page-header">
+        <div class="page-header-top">
+          <nav class="breadcrumb">
+            <a href="menu.jsp" class="btn-nav"><span class="nav-icon">&#8962;</span>Inicio</a>
+            <span>›</span>
+            <a href="productos.html" class="btn-nav"><span class="nav-icon">&#8592;</span>Productos</a>
+            <span>›</span>
+            <span class="breadcrumb-actual">Modificar</span>
+          </nav>
+          <a href="productos.html" class="btn-nav"><span class="nav-icon">&#8592;</span>Volver</a>
+        </div>
+        <h2 class="page-title">Modificar Producto</h2>
+        <p class="page-subtitle">Busca y edita los datos de un producto</p>
       </div>
 
       <div class="division flex">
@@ -76,7 +84,8 @@
               Selecciona producto a modificar
             </p>
 
-            <table width="100%">
+            <div style="overflow-x:auto;">
+            <table style="width:100%;white-space:nowrap;">
               <tr>
                 <th>ID</th>
                 <th>Nombre</th>
@@ -94,19 +103,17 @@
 
                 try {
                     Class.forName("com.mysql.cj.jdbc.Driver");
-                    con = DriverManager.getConnection("jdbc:mysql://localhost:3306/payStream","root","n0m3l0");
+                    con = com.devbiz.util.DB.getConnection();
 
                     if (nombre != null && !nombre.trim().isEmpty()) {
-                        // Buscar por nombre filtrando por usuario en sesión
                         st = con.prepareStatement(
-                            "SELECT * FROM productos WHERE nombre LIKE ? AND usuario_id = ?"
+                            "SELECT * FROM productos WHERE nombre LIKE ? AND usuario_id = ? AND cantidad > 0 ORDER BY nombre ASC"
                         );
                         st.setString(1, "%" + nombre + "%");
                         st.setInt(2, usuarioId);
                     } else {
-                        // Mostrar todos los productos del usuario en sesión
                         st = con.prepareStatement(
-                            "SELECT * FROM productos WHERE usuario_id = ?"
+                            "SELECT * FROM productos WHERE usuario_id = ? AND cantidad > 0 ORDER BY nombre ASC"
                         );
                         st.setInt(1, usuarioId);
                     }
@@ -138,6 +145,7 @@
               %>
 
             </table>
+            </div>
           </div>
         </div>
       </div>

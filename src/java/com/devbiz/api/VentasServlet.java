@@ -1,5 +1,6 @@
 package com.devbiz.api;
 
+import com.devbiz.util.DB;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import java.io.*;
@@ -7,10 +8,6 @@ import java.sql.*;
 
 @WebServlet("/api/ventas")
 public class VentasServlet extends HttpServlet {
-
-    private static final String DB_URL  = "jdbc:mysql://localhost:3306/payStream";
-    private static final String DB_USER = "root";
-    private static final String DB_PASS = "n0m3l0";
 
     // GET /api/ventas?usuarioId=X  → historial de ventas
     @Override
@@ -32,8 +29,7 @@ public class VentasServlet extends HttpServlet {
 
         Connection con = null;
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
+            con = DB.getConnection();
 
             PreparedStatement st = con.prepareStatement(
                 "SELECT v.id, v.fecha, v.total, " +
@@ -93,8 +89,7 @@ public class VentasServlet extends HttpServlet {
 
         Connection con = null;
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
+            con = DB.getConnection();
             con.setAutoCommit(false);
 
             int usuarioId = Integer.parseInt(usuarioIdStr);

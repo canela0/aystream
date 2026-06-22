@@ -1,5 +1,6 @@
 package com.devbiz.api;
 
+import com.devbiz.util.DB;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
 import java.io.*;
@@ -7,10 +8,6 @@ import java.sql.*;
 
 @WebServlet("/api/productos")
 public class ProductosServlet extends HttpServlet {
-
-    private static final String DB_URL  = "jdbc:mysql://localhost:3306/payStream";
-    private static final String DB_USER = "root";
-    private static final String DB_PASS = "n0m3l0";
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res)
@@ -31,8 +28,7 @@ public class ProductosServlet extends HttpServlet {
 
         Connection con = null;
         try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            con = DriverManager.getConnection(DB_URL, DB_USER, DB_PASS);
+            con = DB.getConnection();
 
             // si soloConStock=true (default) solo muestra productos con stock > 0
             // si soloConStock=false muestra todos (para inventario)

@@ -6,6 +6,11 @@
         response.sendRedirect("inicioSesion.jsp");
         return;
     }
+    String fechaDesde = request.getParameter("desde");
+    String fechaHasta = request.getParameter("hasta");
+    // Defaults: último mes
+    if (fechaDesde == null || fechaDesde.isEmpty()) fechaDesde = "";
+    if (fechaHasta == null || fechaHasta.isEmpty()) fechaHasta = "";
 %>
 <!DOCTYPE html>
 <html>
@@ -36,29 +41,68 @@
       .tabla-detalle th { background: #E0E7FF; font-size: 13px; }
       .tabla-detalle td { font-size: 13px; border-bottom: 1px solid #E2E8F0; }
       .sin-datos { text-align: center; color: #9CA3AF; padding: 40px; }
+      .page-header { padding: 28px 40px 20px; border-bottom: 1px solid #E5E7EB; margin-bottom: 8px; }
+      .page-header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+      .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #6B7280; }
+      .breadcrumb-actual { color: #111827; font-weight: 600; }
+      .page-title { font-size: 24px; font-weight: 700; color: #111827; margin: 0 0 4px; }
+      .page-subtitle { font-size: 13px; color: #6B7280; margin: 0; }
+      .btn-nav {
+        display: inline-flex; align-items: center; gap: 6px;
+        background: white; border: 1.5px solid #D1D5DB; border-radius: 999px;
+        padding: 6px 14px 6px 10px; font-size: 12px; font-weight: 600;
+        color: #374151; cursor: pointer; text-decoration: none;
+        transition: all 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,.06);
+      }
+      .btn-nav:hover {
+        background: #EFF6FF; border-color: #2563EB; color: #2563EB;
+        box-shadow: 0 4px 12px rgba(37,99,235,.15); transform: translateX(-3px);
+      }
+      .btn-nav .nav-icon {
+        width: 20px; height: 20px; border-radius: 50%;
+        background: #F3F4F6; display: flex; align-items: center; justify-content: center;
+        font-size: 12px; transition: background 0.2s;
+      }
+      .btn-nav:hover .nav-icon { background: #DBEAFE; }
     </style>
   </head>
   <body class="inicio">
     <section class="inicio-seccion">
 
-      <div class="boton-volver">
-        <input type="button" class="boton boton-borde"
-               value="← Volver al menu"
-               onclick="location.href='menu.html'" />
-      </div>
-      <div class="boton-volver2">
-        <input type="button" class="boton boton-borde"
-               value="← Volver"
-               onclick="location.href='reportes.jsp'" />
-        <h2 class="titulo-seccion">Historial de Ventas</h2>
+            <div class="page-header">
+        <div class="page-header-top">
+          <nav class="breadcrumb">
+            <a href="menu.jsp" class="btn-nav"><span class="nav-icon">⌂</span>Inicio</a>
+            <span>›</span>
+            <a href="reportes.jsp" class="btn-nav"><span class="nav-icon">←</span>Reportes</a>
+            <span>›</span>
+            <span class="breadcrumb-actual">Historial de Ventas</span>
+          </nav>
+          <a href="reportes.jsp" class="btn-nav"><span class="nav-icon">←</span>Volver</a>
+        </div>
+        <h2 class="page-title">Historial de Ventas</h2>
+        <p class="page-subtitle">Registro completo de todas las ventas realizadas</p>
       </div>
 
       <div class="grupo-formulario2">
         <div class="caja-seccion2 tarjeta">
-          <div class="texto-centro">
-            <p class="titulo-seccion2">Todas las ventas registradas</p>
-            <p class="subtitulo-seccion2">Haz clic en una venta para ver su detalle</p>
-          </div>
+          <!-- Filtro por fechas -->
+          <form method="get" action="historialVentas.jsp" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:20px;">
+            <div>
+              <label style="display:block;font-size:12px;font-weight:600;color:#6B7280;margin-bottom:4px;">Desde</label>
+              <input type="date" name="desde" value="<%= fechaDesde %>"
+                style="padding:8px 12px;border:1.5px solid #D1D5DB;border-radius:8px;font-size:13px;font-family:inherit;"/>
+            </div>
+            <div>
+              <label style="display:block;font-size:12px;font-weight:600;color:#6B7280;margin-bottom:4px;">Hasta</label>
+              <input type="date" name="hasta" value="<%= fechaHasta %>"
+                style="padding:8px 12px;border:1.5px solid #D1D5DB;border-radius:8px;font-size:13px;font-family:inherit;"/>
+            </div>
+            <button type="submit" class="boton boton-primario" style="padding:8px 20px;font-size:13px;">Filtrar</button>
+            <% if (!fechaDesde.isEmpty() || !fechaHasta.isEmpty()) { %>
+              <a href="historialVentas.jsp" style="font-size:13px;color:#6B7280;text-decoration:none;padding:8px 0;">✕ Limpiar</a>
+            <% } %>
+          </form>
 
           <%
             Connection con = null;
@@ -71,15 +115,17 @@
 
             try {
               Class.forName("com.mysql.cj.jdbc.Driver");
-              con = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/payStream", "root", "n0m3l0"
-              );
+              con = com.devbiz.util.DB.getConnection();
 
-              stVentas = con.prepareStatement(
-                "SELECT id, fecha, total FROM ventas " +
-                "WHERE usuario_id = ? ORDER BY fecha DESC"
-              );
-              stVentas.setInt(1, usuarioId);
+              String sql = "SELECT id, fecha, total FROM ventas WHERE usuario_id = ?";
+              if (!fechaDesde.isEmpty()) sql += " AND DATE(fecha) >= ?";
+              if (!fechaHasta.isEmpty()) sql += " AND DATE(fecha) <= ?";
+              sql += " ORDER BY fecha DESC";
+              stVentas = con.prepareStatement(sql);
+              int idx = 1;
+              stVentas.setInt(idx++, usuarioId);
+              if (!fechaDesde.isEmpty()) stVentas.setString(idx++, fechaDesde);
+              if (!fechaHasta.isEmpty()) stVentas.setString(idx++, fechaHasta);
               rsVentas = stVentas.executeQuery();
 
               boolean hayVentas = false;

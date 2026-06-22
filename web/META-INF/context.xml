@@ -1,4 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  IMPORTANTE antes de subir a Azure:
+  Esta es la ÚNICA conexión a BD que sigue apuntando a "localhost" en todo
+  el proyecto (la usa el <Realm> de Tomcat para el login por j_security_check).
+  Todo lo demás (JSPs y servlets) ya lee la conexión desde com.devbiz.util.DB,
+  configurable con las variables de entorno DB_HOST, DB_NAME, DB_USER, DB_PASS.
+
+  Edita la "url"/"username"/"password" de abajo con los datos reales de tu
+  Azure Database for MySQL antes de generar el WAR final, por ejemplo:
+    url="jdbc:mysql://miservidor.mysql.database.azure.com:3306/payStream?useSSL=true"
+-->
 <Context path="/PayStream">
 
     <Resource name="jdbc/payStream"
@@ -19,6 +30,11 @@
            userNameCol="correo"
            userCredCol="contrasena"
            userRoleTable="user_roles"
-           roleNameCol="role_name"/>
+           roleNameCol="role_name">
+        <CredentialHandler className="org.apache.catalina.realm.MessageDigestCredentialHandler"
+                           algorithm="SHA-256"
+                           iterations="1"
+                           saltLength="0"/>
+    </Realm>
 
 </Context>

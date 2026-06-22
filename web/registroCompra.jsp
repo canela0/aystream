@@ -30,9 +30,7 @@
                              ? Double.parseDouble(precioCostoStr) : precio;
 
         Class.forName("com.mysql.cj.jdbc.Driver");
-        con = DriverManager.getConnection(
-            "jdbc:mysql://localhost:3306/payStream", "root", "n0m3l0"
-        );
+        con = com.devbiz.util.DB.getConnection();
 
         // 1. Insertar producto
         stProd = con.prepareStatement(

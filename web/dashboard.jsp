@@ -16,9 +16,7 @@
         Connection conAuth = null;
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            conAuth = DriverManager.getConnection(
-                "jdbc:mysql://localhost:3306/payStream", "root", "n0m3l0"
-            );
+            conAuth = com.devbiz.util.DB.getConnection();
             PreparedStatement stAuth = conAuth.prepareStatement(
                 "SELECT id, nombre FROM usuarios WHERE correo = ?"
             );
@@ -181,7 +179,7 @@
     <nav class="sidebar-nav">
       <span class="sidebar-label">Menú</span>
 
-      <button class="sidebar-link active" onclick="navegar('menu.html', this)">
+      <button class="sidebar-link active" onclick="navegar('menu.jsp', this)">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
           <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
@@ -259,7 +257,7 @@
     <iframe
       id="contenido"
       class="marco-contenido"
-      src="menu.html"
+      src="menu.jsp"
       name="contenido">
     </iframe>
   </main>

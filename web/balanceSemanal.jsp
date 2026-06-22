@@ -12,9 +12,7 @@
     Connection con = null;
     try {
         Class.forName("com.mysql.cj.jdbc.Driver");
-        con = DriverManager.getConnection(
-            "jdbc:mysql://localhost:3306/payStream", "root", "n0m3l0"
-        );
+        con = com.devbiz.util.DB.getConnection();
 
         LocalDate hoy = LocalDate.now();
 
@@ -124,6 +122,12 @@
 
     .balance-page { padding: 32px 40px 48px; }
 
+    .btn-nav { display: inline-flex; align-items: center; gap: 6px; background: white; border: 1.5px solid #D1D5DB; border-radius: 999px; padding: 6px 14px 6px 10px; font-size: 12px; font-weight: 600; color: #374151; cursor: pointer; text-decoration: none; transition: all 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+    .btn-nav:hover { background: #EFF6FF; border-color: #2563EB; color: #2563EB; box-shadow: 0 4px 12px rgba(37,99,235,.15); transform: translateX(-3px); }
+    .btn-nav .nav-icon { width: 20px; height: 20px; border-radius: 50%; background: #F3F4F6; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; transition: background 0.2s; }
+    .btn-nav:hover .nav-icon { background: #DBEAFE; }
+    .balance-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+
     /* ── Encabezado ── */
     .balance-header { margin-bottom: 28px; }
     .balance-header-label {
@@ -184,6 +188,17 @@
 </head>
 <body>
 <div class="balance-page">
+
+  <div class="balance-nav">
+    <nav style="display:flex;align-items:center;gap:6px;font-size:13px;color:#6B7280;">
+      <a href="menu.jsp" class="btn-nav"><span class="nav-icon">&#8962;</span>Inicio</a>
+      <span>›</span>
+      <a href="reportes.jsp" class="btn-nav"><span class="nav-icon">&#8592;</span>Reportes</a>
+      <span>›</span>
+      <strong style="color:#111827;">Balance Semanal</strong>
+    </nav>
+    <a href="reportes.jsp" class="btn-nav"><span class="nav-icon">&#8592;</span>Volver</a>
+  </div>
 
   <div class="balance-header">
     <div class="balance-header-label">Reportes</div>

@@ -19,7 +19,7 @@
     <div class="boton-volver">
       <input type="button" class="boton boton-borde"
              value="← Volver al menu"
-             onclick="location.href='menu.html'" />
+             onclick="location.href='menu.jsp'" />
     </div>
 
     <section class="seccion">

@@ -23,9 +23,7 @@
 
     try {
         Class.forName("com.mysql.cj.jdbc.Driver");
-        con = DriverManager.getConnection(
-            "jdbc:mysql://localhost:3306/payStream", "root", "n0m3l0"
-        );
+        con = com.devbiz.util.DB.getConnection();
 
         // Leer valores actuales ANTES de modificar (necesarios para el movimiento)
         PreparedStatement stLeer = con.prepareStatement(
