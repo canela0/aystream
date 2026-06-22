@@ -67,7 +67,7 @@
               ⚠ Intento <%= intentos %> de <%= MAX_INTENTOS %>. Después se bloqueará 10 minutos.
             </div>
             <% } %>
-            <form class="grupo-formulario" method="post" action="j_security_check" <%= bloqueado ? "onsubmit='return false'" : "" %>>
+            <form class="grupo-formulario" id="formLogin" method="post" action="j_security_check" <%= bloqueado ? "onsubmit='return false'" : "onsubmit='return evitarDobleEnvio()'" %>>
                 <div class="grupo-input">
                     <label>Correo Electronico</label>
                     <input class="input-datos" type="email" id="j_username" name="j_username"
@@ -89,7 +89,7 @@
                 <% if (error && !bloqueado) { %>
                     <p style="color:#DC2626; text-align:left; font-size:13px;">Correo o contraseña incorrectos.</p>
                 <% } %>
-                <button class="boton boton-primario" style="margin-top:20px;<%= bloqueado ? "opacity:.5;cursor:not-allowed;" : "" %>" type="submit" <%= bloqueado ? "disabled" : "" %>>
+                <button class="boton boton-primario" id="btnLogin" style="margin-top:20px;<%= bloqueado ? "opacity:.5;cursor:not-allowed;" : "" %>" type="submit" <%= bloqueado ? "disabled" : "" %>>
                     Iniciar sesión
                 </button>
             </form>
@@ -108,6 +108,15 @@
     else if (cd) cd.textContent = secs;
   }, 1000);
   <% } %>
+
+  var envioEnCurso = false;
+  function evitarDobleEnvio() {
+    if (envioEnCurso) return false;
+    envioEnCurso = true;
+    var btn = document.getElementById('btnLogin');
+    if (btn) { btn.disabled = true; btn.style.opacity = '.6'; btn.textContent = 'Iniciando sesión...'; }
+    return true;
+  }
 
   function toggleOjo() {
     var inp = document.getElementById('j_password');
